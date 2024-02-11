@@ -1,4 +1,4 @@
-namespace HackerNewsAPI
+namespace HackerNews.API
 {
     public class WeatherForecast
     {
