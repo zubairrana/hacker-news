@@ -53,10 +53,14 @@ namespace HackerNews.BusinessLogic.Services
 
         private async Task<BestStory?> GetBestStoryDetailAsync(long storyId)
         {
-            var story = await GetAsync<BestStory>(string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, string.Format(HackerNewsAPIConstants.BestStoryDetailsEndpoint, storyId)));
+            if (!(_memoryCache.TryGetValue(storyId, out BestStory? bestStory) && bestStory != null))
+            {
+                bestStory = await GetAsync<BestStory>(string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, string.Format(HackerNewsAPIConstants.BestStoryDetailsEndpoint, storyId)));
+                _memoryCache.Set(storyId, bestStory, TimeSpan.FromSeconds(60));
+            }
 
-            return story;
+            return bestStory;
+
         }
-
     }
 }
