@@ -19,13 +19,13 @@ namespace HackerNews.BusinessLogic.Services
             _mapper = mapper;
         }
 
-
         public async Task<List<BestStory>> GetBestStoriesAsync(int count)
         {
             var storyIds = await GetAsync<List<long>>(string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, HackerNewsAPIConstants.BestStoriesIdsEndpoint));
             if (storyIds != null)
             {
                 var stories = new List<BestStoryModel>();
+
                 await storyIds.Take(count).ParallelForEachAsync(async storyId =>
                 {
                     var story = await GetBestStoryDetailAsync(storyId);
@@ -36,7 +36,7 @@ namespace HackerNews.BusinessLogic.Services
                     }
                 });
 
-                return _mapper.Map<List<BestStory>>(stories);
+                return _mapper.Map<List<BestStory>>(stories.OrderByDescending(x=>x.Score));
             }
 
             return new List<BestStory>();
@@ -58,7 +58,10 @@ namespace HackerNews.BusinessLogic.Services
         {
             if (!(_memoryCache.TryGetValue(storyId, out BestStoryModel? bestStory) && bestStory != null))
             {
-                bestStory = await GetAsync<BestStoryModel>(string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, string.Format(HackerNewsAPIConstants.BestStoryDetailsEndpoint, storyId)));
+                bestStory = await GetAsync<BestStoryModel>(
+                    string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, 
+                    string.Format(HackerNewsAPIConstants.BestStoryDetailsEndpoint, storyId))
+                    );
                 _memoryCache.Set(storyId, bestStory, TimeSpan.FromSeconds(60));
             }
 
