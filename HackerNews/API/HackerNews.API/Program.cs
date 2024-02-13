@@ -31,14 +31,11 @@ builder.Host.ConfigureContainer<ContainerBuilder>(builder =>
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.ShowCommonExtensions();
-    });
-}
+    c.ShowCommonExtensions();
+});
 
 app.UseHttpsRedirection();
 
