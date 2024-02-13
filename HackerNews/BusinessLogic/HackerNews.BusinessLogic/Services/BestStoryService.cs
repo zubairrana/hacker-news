@@ -1,6 +1,8 @@
-﻿using Dasync.Collections;
+﻿using AutoMapper;
+using Dasync.Collections;
 using HackerNews.BusinessLogic.Contracts;
 using HackerNews.Domain.Constants;
+using HackerNews.Domain.DTO;
 using HackerNews.Domain.Models;
 using Microsoft.Extensions.Caching.Memory;
 using System.Net.Http.Json;
@@ -10,10 +12,11 @@ namespace HackerNews.BusinessLogic.Services
     public class BestStoryService : IBestStoryService
     {
         private readonly IMemoryCache _memoryCache;
-
-        public BestStoryService(IMemoryCache memoryCache)
+        private readonly IMapper _mapper;
+        public BestStoryService(IMemoryCache memoryCache, IMapper mapper)
         {
             _memoryCache = memoryCache;
+            _mapper = mapper;
         }
 
 
@@ -22,7 +25,7 @@ namespace HackerNews.BusinessLogic.Services
             var storyIds = await GetAsync<List<long>>(string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, HackerNewsAPIConstants.BestStoriesIdsEndpoint));
             if (storyIds != null)
             {
-                var stories = new List<BestStory>();
+                var stories = new List<BestStoryModel>();
                 await storyIds.Take(count).ParallelForEachAsync(async storyId =>
                 {
                     var story = await GetBestStoryDetailAsync(storyId);
@@ -33,7 +36,7 @@ namespace HackerNews.BusinessLogic.Services
                     }
                 });
 
-                return stories;
+                return _mapper.Map<List<BestStory>>(stories);
             }
 
             return new List<BestStory>();
@@ -51,11 +54,11 @@ namespace HackerNews.BusinessLogic.Services
             return default;
         }
 
-        private async Task<BestStory?> GetBestStoryDetailAsync(long storyId)
+        private async Task<BestStoryModel?> GetBestStoryDetailAsync(long storyId)
         {
-            if (!(_memoryCache.TryGetValue(storyId, out BestStory? bestStory) && bestStory != null))
+            if (!(_memoryCache.TryGetValue(storyId, out BestStoryModel? bestStory) && bestStory != null))
             {
-                bestStory = await GetAsync<BestStory>(string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, string.Format(HackerNewsAPIConstants.BestStoryDetailsEndpoint, storyId)));
+                bestStory = await GetAsync<BestStoryModel>(string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, string.Format(HackerNewsAPIConstants.BestStoryDetailsEndpoint, storyId)));
                 _memoryCache.Set(storyId, bestStory, TimeSpan.FromSeconds(60));
             }
 

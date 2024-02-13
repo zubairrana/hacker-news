@@ -1,5 +1,6 @@
 using Autofac;
 using Autofac.Extensions.DependencyInjection;
+using AutoMapper;
 using HackerNews.BusinessLogic.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +12,13 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddMemoryCache();
+
+var mapperConfig = new MapperConfiguration(mc =>
+{
+    mc.AddProfile(typeof(BusinessLogicMappingProfile));
+});
+IMapper mapper = mapperConfig.CreateMapper();
+builder.Services.AddSingleton(mapper);
 
 // Call UseServiceProviderFactory on the Host sub property 
 builder.Host.UseServiceProviderFactory(new AutofacServiceProviderFactory());

@@ -1,4 +1,4 @@
-﻿using HackerNews.Domain.Models;
+﻿using HackerNews.Domain.DTO;
 
 namespace HackerNews.BusinessLogic.Contracts
 {

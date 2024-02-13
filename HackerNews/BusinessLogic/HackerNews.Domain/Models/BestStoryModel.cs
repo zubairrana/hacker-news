@@ -1,6 +1,6 @@
 ﻿namespace HackerNews.Domain.Models
 {
-    public class BestStory
+    public class BestStoryModel
     {
         public string By { get; set; } = string.Empty;
         public long Descendants { get; set; }
