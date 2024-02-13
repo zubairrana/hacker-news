@@ -1,10 +1,13 @@
-# hacker-news
+# Hacker News API Test
 Bamboo Card Hacker News API Test
 
 ## Description
 This project is a .NET 8 web API application developed in Visual Studio 2022. 
 
-## Prerequisites
+## Hosting URL
+- [Hacker News - Zubair's Portfolio Website](https://hackernews.zubairrana.com/swagger/index.html)
+
+## Prerequisites For Local Testing and Code Review
 - [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
 - [Visual Studio 2022](https://visualstudio.microsoft.com/vs/)
 
