@@ -1,4 +1,5 @@
-﻿using HackerNews.BusinessLogic.Contracts;
+﻿using AutoMapper;
+using HackerNews.BusinessLogic.Contracts;
 using HackerNews.Domain.DTO;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
@@ -13,10 +14,14 @@ namespace HackerNews.API.Controllers
     public class BestStoriesController : ControllerBase
     {
         private readonly IBestStoryService _bestStoryService;
-        
-        public BestStoriesController(IBestStoryService bestStoryService) 
+        private readonly IMapper _mapper;
+
+        public BestStoriesController(
+            IBestStoryService bestStoryService,
+            IMapper mapper) 
         {
             _bestStoryService = bestStoryService;
+            _mapper = mapper;
             
         }
 
@@ -29,16 +34,24 @@ namespace HackerNews.API.Controllers
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(List<BestStory>))]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<IActionResult> GetBestStoriesAsync([FromQuery][Range(1, 200)][Required][DefaultValue(1)] int count)
+        public async Task<IActionResult> GetBestStoriesAsync(
+            [FromQuery][Range(1, 200)][Required][DefaultValue(1)] int count,
+            [FromQuery] string title = "",
+            int pageNumber = 1)
         {
-            var stories = await _bestStoryService.GetBestStoriesAsync(count);
+            var stories = await _bestStoryService.GetBestStoriesAsync(count, title, pageNumber);
+            var result = new BaseResponse
+            {
+                PageNumber = pageNumber,
+                BestStories = stories
+            };
 
-            if (stories == null || !stories.Any())
+            if (result == null || !result.BestStories.Any())
             {
                 return NoContent();
             }
 
-            return Ok(stories);
+            return Ok(result);
         }
     }
 }

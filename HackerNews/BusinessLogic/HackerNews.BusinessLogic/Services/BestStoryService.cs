@@ -19,22 +19,52 @@ namespace HackerNews.BusinessLogic.Services
             _mapper = mapper;
         }
 
-        public async Task<List<BestStory>> GetBestStoriesAsync(int count)
+        public async Task<List<BestStory>> GetBestStoriesAsync(int count, string title, int pageNumber)
         {
             var storyIds = await GetAsync<List<long>>(string.Format(HackerNewsAPIConstants.HackerNewsApiBaseUrl, HackerNewsAPIConstants.BestStoriesIdsEndpoint));
             if (storyIds != null)
             {
                 var stories = new List<BestStoryModel>();
+                int storiesToReturn = HackerNewsAPIConstants.PageSize;
+                int storiesToSkip = (pageNumber - 1) * storiesToReturn;
+                int skippedStories = 0;
 
-                await storyIds.Take(count).ParallelForEachAsync(async storyId =>
+                if (count < HackerNewsAPIConstants.PageSize)
+                {
+                    storiesToReturn = count;
+                }
+
+                foreach (var storyId in storyIds)
                 {
                     var story = await GetBestStoryDetailAsync(storyId);
 
-                    if (story != null)
+                    if (story != null && (string.IsNullOrEmpty(title) || story.Title.Contains(title)))
                     {
-                        stories.Add(story);
+                        if (skippedStories >= storiesToSkip)
+                        {
+                            stories.Add(story);
+                        }
+                        else
+                        {
+                            skippedStories++;
+                        }
                     }
-                });
+
+                    if (stories.Count == storiesToReturn)
+                    {
+                        break;
+                    }
+                }
+
+                //await storyIds.Take(count).ParallelForEachAsync(async storyId =>
+                //{
+                //    var story = await GetBestStoryDetailAsync(storyId);
+
+                //    if (story != null)
+                //    {
+                //        stories.Add(story);
+                //    }
+                //});
 
                 return _mapper.Map<List<BestStory>>(stories.OrderByDescending(x=>x.Score));
             }

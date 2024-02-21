@@ -4,6 +4,6 @@ namespace HackerNews.BusinessLogic.Contracts
 {
     public interface IBestStoryService
     {
-        Task<List<BestStory>> GetBestStoriesAsync(int count);
+        Task<List<BestStory>> GetBestStoriesAsync(int count, string title, int pageNumber);
     }
 }
